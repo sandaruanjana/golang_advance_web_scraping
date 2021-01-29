@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/mxschmitt/playwright-go"
 	"log"
 )
@@ -33,6 +35,14 @@ func (tcf Block) Do() {
 }
 
 func main() {
+
+	db, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/ikman")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer db.Close()
 
 	var s []string
 
@@ -79,8 +89,6 @@ func main() {
 	}
 
 	for _, entry := range entries {
-
-		//titleElement, err := entry.QuerySelectorAll(".normal--2QYVk gtm-normal-ad")
 
 		titleElement, err := entry.QuerySelectorAll("li > a")
 		if err != nil {
@@ -131,11 +139,19 @@ func main() {
 					fmt.Println(tel)
 					fmt.Println(desc)
 
+					insert, err := db.Query("INSERT INTO item_details VALUES ( null , '" + category + "', '" + district + "', '" + title + "', '" + date + "', '" + price + "', '" + address + "', '" + desc + "', '" + tel + "')")
+
+					if err != nil {
+						panic(err.Error())
+					}
+
+					defer insert.Close()
+
 					fmt.Println("----------------------------------------")
 
 				},
 				Catch: func(e Exception) {
-					fmt.Printf("Caught %v\n", e)
+					//fmt.Printf("Caught %v\n", e)
 				},
 				Finally: func() {
 
